@@ -10,7 +10,6 @@ vim.call('plug#begin', path)
     Plug('nvim-telescope/telescope.nvim', { branch = '0.1.x' })
     Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
     Plug('ziglang/zig.vim')
-    Plug('phanviet/vim-monokai-pro')
     Plug('tpope/vim-surround')
     Plug('tpope/vim-commentary')
     Plug('raimondi/delimitmate')
@@ -21,6 +20,10 @@ vim.call('plug#begin', path)
     Plug('hrsh7th/nvim-cmp')
     Plug('hrsh7th/vim-vsnip')
     Plug('feline-nvim/feline.nvim')
+
+    -- Colors
+    Plug('junegunn/seoul256.vim')
+    Plug('phanviet/vim-monokai-pro')
 vim.call('plug#end')
 
 ----------------------------------------
@@ -35,10 +38,12 @@ vim.opt.shiftwidth = 4
 vim.opt.joinspaces = false
 vim.opt.swapfile = false
 vim.opt.ignorecase = true
+vim.opt.signcolumn = 'yes'
 
 vim.g.mapleader = ' '
+vim.g.seoul256_background = 234
 vim.api.nvim_set_var('delimitMate_expand_cr', true)
-vim.cmd('colorscheme monokai_pro')
+vim.cmd('colorscheme seoul256')
 
 ----------------------------------------
 -- Feline
@@ -64,10 +69,9 @@ ts.setup({
     incremental_selection = {
         enable = true,
         keymaps = {
-            init_selection = 'gnn',
-            node_incremental = 'grn',
-            scope_incremental = 'grc',
-            node_decremental = 'grm',
+            init_selection = '<M-o>',
+            node_incremental = '<M-o>',
+            node_decremental = '<M-i>',
         }
     }
 })
@@ -75,7 +79,7 @@ ts.setup({
 ----------------------------------------
 -- LSP
 ----------------------------------------
---
+
 local lsp_nmap = function(ptn, fn, bufopts)
     vim.keymap.set('n', ptn, fn, bufopts)
 end
@@ -104,10 +108,17 @@ local lsp_flags = {
     debounce_text_changes = 150,
 }
 local lsp = require('lspconfig')
-lsp.rust_analyzer.setup({ on_attach = on_attach })
-lsp.luau_lsp.setup({ on_attach = on_attach })
-lsp.clangd.setup({ on_attach = on_attach })
-lsp.zls.setup({ on_attach = on_attach })
+local capabilities = require('cmp_nvim_lsp').update_capabilities(
+    vim.lsp.protocol.make_client_capabilities()
+)
+local settings = {
+    capabilities = capabilities,
+    on_attach = on_attach
+}
+lsp.rust_analyzer.setup(settings)
+lsp.luau_lsp.setup(settings)
+lsp.clangd.setup(settings)
+lsp.zls.setup(settings)
 
 ----------------------------------------
 -- Cmp
@@ -170,7 +181,17 @@ cmp.setup({
     }, {
         { name = 'buffer' },
     }),
+    cmp.setup.cmdline('/', {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = { { name = 'buffer' } }
+    })
 })
+
+----------------------------------------
+-- Autocmd
+----------------------------------------
+
+vim.api.nvim_create_autocmd("BufWritePre", { callback = vim.lsp.buf.formatting })
 
 ----------------------------------------
 -- Keymap
@@ -190,11 +211,11 @@ local vmap = function(key, cmd)
 end
 
 imap('<M-BS>', '<C-w>')
-nmap('<leader>s', '<cmd>source /home/jefftime/.vimrc<cr>')
 nmap('<leader>f', '<cmd>Telescope find_files<cr>')
 nmap('<leader>/', '<cmd>Telescope live_grep<cr>')
 nmap('<leader>b', '<cmd>Telescope buffers<cr>')
-nmap('<leader>e', '<cmd>Telescope symbols<cr>')
+nmap('<leader>s', '<cmd>Telescope lsp_document_symbols<cr>')
+nmap('<leader>S', '<cmd>Telescope lsp_workspace_symbols<cr>')
 nmap('<leader>t', '<cmd>Telescope<cr>')
 nmap('<leader>q', '<cmd>bwipeout<cr>')
 nmap('<leader>wj', '<cmd>wincmd j<cr>')
@@ -207,7 +228,8 @@ nmap('<leader>h', '^')
 nmap('<leader>p', '"+p')
 nmap('<leader>y', '"+y')
 vmap('<leader>y', '"+y')
--- TODO: Completion
+nmap('gl', '$')
+nmap('gh', '^')
 nmap('<M-}>', 'gt')
 nmap('<M-{>', 'gT')
 nmap('<Up>', '<C-y>')
@@ -218,4 +240,5 @@ nmap('<M-k>', '<C-y>')
 imap('<M-k>', '<C-y>')
 nmap('<M-;>', '<cmd>Commentary<cr>')
 vmap('<M-;>', '<Plug>Commentary')
+nmap('\\', '<cmd>noh<cr>')
 
