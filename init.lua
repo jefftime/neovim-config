@@ -20,7 +20,33 @@ vim.call('plug#begin', path)
     Plug('hrsh7th/cmp-cmdline')
     Plug('hrsh7th/nvim-cmp')
     Plug('hrsh7th/vim-vsnip')
+    Plug('feline-nvim/feline.nvim')
 vim.call('plug#end')
+
+----------------------------------------
+-- Options
+----------------------------------------
+
+vim.opt.number = true
+vim.opt.termguicolors = true
+vim.opt.expandtab = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.joinspaces = false
+vim.opt.swapfile = false
+vim.opt.ignorecase = true
+
+vim.g.mapleader = ' '
+vim.api.nvim_set_var('delimitMate_expand_cr', true)
+vim.cmd('colorscheme monokai_pro')
+
+----------------------------------------
+-- Feline
+----------------------------------------
+
+-- require('eden.colors')
+-- require('eden.feline')
+-- require('feline').setup()
 
 ----------------------------------------
 -- Tree Sitter
@@ -28,7 +54,7 @@ vim.call('plug#end')
 
 local ts = require('nvim-treesitter.configs')
 ts.setup({
-    ensure_installed = { 'c', 'zig', 'lua' },
+    ensure_installed = { 'c', 'zig', 'lua', 'rust' },
     sync_install = false,
     auto_install = true,
     highlight = {
@@ -78,12 +104,10 @@ local lsp_flags = {
     debounce_text_changes = 150,
 }
 local lsp = require('lspconfig')
-lsp.clangd.setup({
-    on_attach = on_attach
-})
-lsp.zls.setup({
-    on_attach = on_attach
-})
+lsp.rust_analyzer.setup({ on_attach = on_attach })
+lsp.luau_lsp.setup({ on_attach = on_attach })
+lsp.clangd.setup({ on_attach = on_attach })
+lsp.zls.setup({ on_attach = on_attach })
 
 ----------------------------------------
 -- Cmp
@@ -149,23 +173,6 @@ cmp.setup({
 })
 
 ----------------------------------------
--- Options
-----------------------------------------
-
-vim.opt.number = true
-vim.opt.termguicolors = true
-vim.opt.expandtab = true
-vim.opt.tabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.joinspaces = false
-vim.opt.swapfile = false
-vim.opt.ignorecase = true
-
-vim.g.mapleader = ' '
-vim.api.nvim_set_var('delimitMate_expand_cr', true)
-vim.cmd('colorscheme monokai_pro')
-
-----------------------------------------
 -- Keymap
 ----------------------------------------
 
@@ -197,6 +204,9 @@ nmap('<leader>wl', '<cmd>wincmd l<cr>')
 nmap('<leader>wq', '<cmd>wincmd q<cr>')
 nmap('<leader>l', '$')
 nmap('<leader>h', '^')
+nmap('<leader>p', '"+p')
+nmap('<leader>y', '"+y')
+vmap('<leader>y', '"+y')
 -- TODO: Completion
 nmap('<M-}>', 'gt')
 nmap('<M-{>', 'gT')
@@ -208,3 +218,4 @@ nmap('<M-k>', '<C-y>')
 imap('<M-k>', '<C-y>')
 nmap('<M-;>', '<cmd>Commentary<cr>')
 vmap('<M-;>', '<Plug>Commentary')
+
