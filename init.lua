@@ -9,6 +9,7 @@ vim.call('plug#begin', path)
     Plug('nvim-lua/plenary.nvim')
     Plug('nvim-telescope/telescope.nvim', { branch = '0.1.x' })
     Plug('nvim-treesitter/nvim-treesitter', { ['do'] = ':TSUpdate' })
+    Plug('nvim-treesitter/nvim-treesitter-context')
     Plug('ziglang/zig.vim')
     Plug('tpope/vim-surround')
     Plug('tpope/vim-commentary')
@@ -20,6 +21,7 @@ vim.call('plug#begin', path)
     Plug('hrsh7th/nvim-cmp')
     Plug('hrsh7th/vim-vsnip')
     Plug('feline-nvim/feline.nvim')
+    Plug('akinsho/toggleterm.nvim')
 
     -- Colors
     Plug('junegunn/seoul256.vim')
@@ -46,6 +48,15 @@ vim.api.nvim_set_var('delimitMate_expand_cr', true)
 vim.cmd('colorscheme seoul256')
 
 ----------------------------------------
+-- Toggleterm
+----------------------------------------
+
+require('toggleterm').setup({
+    open_mapping = '<M-t>',
+    direction = 'float'
+})
+
+----------------------------------------
 -- Feline
 ----------------------------------------
 
@@ -57,8 +68,7 @@ vim.cmd('colorscheme seoul256')
 -- Tree Sitter
 ----------------------------------------
 
-local ts = require('nvim-treesitter.configs')
-ts.setup({
+require('nvim-treesitter.configs').setup({
     ensure_installed = { 'c', 'zig', 'lua', 'rust' },
     sync_install = false,
     auto_install = true,
@@ -74,6 +84,32 @@ ts.setup({
             node_decremental = '<M-i>',
         }
     }
+})
+require('treesitter-context').setup({
+    enable = true,
+    max_lines = 0,
+    trim_scope = 'outer',
+    min_window_height = 0,
+    patterns = {
+        default = {
+            'class',
+            'function',
+            'method',
+            'for',
+            'while',
+            'if',
+            'switch',
+            'case',
+        },
+        rust = {
+            'impl_item',
+            'struct',
+            'enum',
+        },
+    },
+    zindex = 20,
+    mode = 'cursor',
+    separator = nil,
 })
 
 ----------------------------------------
@@ -191,7 +227,7 @@ cmp.setup({
 -- Autocmd
 ----------------------------------------
 
-vim.api.nvim_create_autocmd("BufWritePre", { callback = vim.lsp.buf.formatting })
+-- vim.api.nvim_create_autocmd("BufWritePre", { callback = vim.lsp.buf.formatting })
 
 ----------------------------------------
 -- Keymap
