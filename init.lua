@@ -20,6 +20,7 @@ vim.call('plug#begin', path)
     Plug('hrsh7th/cmp-cmdline')
     Plug('hrsh7th/nvim-cmp')
     Plug('hrsh7th/vim-vsnip')
+    Plug('hrsh7th/cmp-nvim-lsp-signature-help')
     Plug('feline-nvim/feline.nvim')
     Plug('akinsho/toggleterm.nvim')
 
@@ -32,6 +33,8 @@ vim.call('plug#end')
 -- Options
 ----------------------------------------
 
+vim.opt.mouse = {}
+vim.opt.formatoptions = 'tqj'
 vim.opt.number = true
 vim.opt.termguicolors = true
 vim.opt.expandtab = true
@@ -119,6 +122,16 @@ require('treesitter-context').setup({
 local lsp_nmap = function(ptn, fn, bufopts)
     vim.keymap.set('n', ptn, fn, bufopts)
 end
+local lsp_imap = function(ptn, fn, bufopts)
+    vim.keymap.set('i', ptn, fn, bufopts)
+end
+
+vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
+    vim.lsp.diagnostic.on_publish_diagnostics,
+    {
+        virtual_text = false
+    }
+)
 
 local opts = { noremap = true, silent = true }
 lsp_nmap('<leader>e', vim.diagnostic.open_float, opts)
@@ -133,7 +146,7 @@ local on_attach = function(client, bufnr)
     lsp_nmap('gd', vim.lsp.buf.definition, bufopts)
     lsp_nmap('K', vim.lsp.buf.hover, bufopts)
     lsp_nmap('gi', vim.lsp.buf.implementation, bufopts)
-    lsp_nmap('<C-k>', vim.lsp.buf.signature_help, bufopts)
+    lsp_imap('<M-k>', vim.lsp.buf.signature_help, bufopts)
     lsp_nmap('<leader>D', vim.lsp.buf.type_definition, bufopts)
     lsp_nmap('<leader>r', vim.lsp.buf.rename, bufopts)
     lsp_nmap('gr', vim.lsp.buf.references, bufopts)
@@ -169,7 +182,11 @@ local has_words_before = function()
 end
 
 local feedkey = function(key, mode)
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
+    vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes(key, true, true, true),
+        mode,
+        true
+    )
 end
 
 local cmp = require('cmp')
@@ -206,16 +223,36 @@ cmp.setup({
             end
         end, { 'i', 's' }),
 
+        ['<M-n>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_next_item()
+            else
+                fallback()
+            end
+        end, { 'i', 's' }),
+
+        ['<M-p>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_prev_item()
+            else
+                fallback()
+            end
+        end, { 'i', 's' }),
+
         ['<C-e>'] = cmp.mapping.abort(),
         ['<CR>'] = cmp.mapping.confirm({ select = true }),
-        -- ['<M-n>'] = cmp.select_next_item(),
-        -- ['<M-p>'] = cmp.select_prev_item(),
     },
     sources = cmp.config.sources({
         { name = 'nvim_lsp' },
         { name = 'vsnip' },
+        { name = 'nvim_lsp_signature_help' },
     }, {
         { name = 'buffer' },
+    }),
+    cmp.setup.cmdline(':', {
+        sources = {
+            { name = 'cmdline' }
+        }
     }),
     cmp.setup.cmdline('/', {
         mapping = cmp.mapping.preset.cmdline(),
@@ -227,7 +264,10 @@ cmp.setup({
 -- Autocmd
 ----------------------------------------
 
--- vim.api.nvim_create_autocmd("BufWritePre", { callback = vim.lsp.buf.formatting })
+vim.api.nvim_create_autocmd('BufWritePre', {
+    pattern = {'*.rs'},
+    callback = vim.lsp.buf.formatting
+})
 
 ----------------------------------------
 -- Keymap
@@ -259,6 +299,8 @@ nmap('<leader>wk', '<cmd>wincmd k<cr>')
 nmap('<leader>wh', '<cmd>wincmd h<cr>')
 nmap('<leader>wl', '<cmd>wincmd l<cr>')
 nmap('<leader>wq', '<cmd>wincmd q<cr>')
+nmap('<leader>bd', '<cmd>bp<bar>sp<bar>bn<bar>bd!<cr>')
+nmap('<leader>a', '<cmd>lua vim.lsp.buf.code_action()<cr>')
 nmap('<leader>l', '$')
 nmap('<leader>h', '^')
 nmap('<leader>p', '"+p')
