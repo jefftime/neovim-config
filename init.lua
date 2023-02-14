@@ -23,6 +23,7 @@ vim.call('plug#begin', path)
     Plug('hrsh7th/cmp-nvim-lsp-signature-help')
     Plug('feline-nvim/feline.nvim')
     Plug('akinsho/toggleterm.nvim')
+    Plug('mattn/emmet-vim')
 
     -- Colors
     Plug('junegunn/seoul256.vim')
@@ -44,11 +45,14 @@ vim.opt.joinspaces = false
 vim.opt.swapfile = false
 vim.opt.ignorecase = true
 vim.opt.signcolumn = 'yes'
+vim.opt.relativenumber = true
 
 vim.g.mapleader = ' '
 vim.g.seoul256_background = 234
 vim.api.nvim_set_var('delimitMate_expand_cr', true)
 vim.cmd('colorscheme seoul256')
+vim.cmd('highlight clear Exception')
+vim.cmd('highlight Exception ctermfg=103 guifg=#999abd')
 
 ----------------------------------------
 -- Toggleterm
@@ -58,14 +62,6 @@ require('toggleterm').setup({
     open_mapping = '<M-t>',
     direction = 'float'
 })
-
-----------------------------------------
--- Feline
-----------------------------------------
-
--- require('eden.colors')
--- require('eden.feline')
--- require('feline').setup()
 
 ----------------------------------------
 -- Tree Sitter
@@ -157,7 +153,7 @@ local lsp_flags = {
     debounce_text_changes = 150,
 }
 local lsp = require('lspconfig')
-local capabilities = require('cmp_nvim_lsp').update_capabilities(
+local capabilities = require('cmp_nvim_lsp').default_capabilities(
     vim.lsp.protocol.make_client_capabilities()
 )
 local settings = {
@@ -268,6 +264,10 @@ vim.api.nvim_create_autocmd('BufWritePre', {
     pattern = {'*.rs'},
     callback = vim.lsp.buf.formatting
 })
+-- vim.api.nvim_create_autocmd({ 'BufRead', 'BufWritePre' }, {
+--     pattern = { '*.frag', '*.vert' },
+--     callback = function() end
+-- })
 
 ----------------------------------------
 -- Keymap
@@ -293,19 +293,20 @@ nmap('<leader>b', '<cmd>Telescope buffers<cr>')
 nmap('<leader>s', '<cmd>Telescope lsp_document_symbols<cr>')
 nmap('<leader>S', '<cmd>Telescope lsp_workspace_symbols<cr>')
 nmap('<leader>t', '<cmd>Telescope<cr>')
-nmap('<leader>q', '<cmd>bwipeout<cr>')
+-- nmap('<leader>q', '<cmd>bwipeout<cr>')
 nmap('<leader>wj', '<cmd>wincmd j<cr>')
 nmap('<leader>wk', '<cmd>wincmd k<cr>')
 nmap('<leader>wh', '<cmd>wincmd h<cr>')
 nmap('<leader>wl', '<cmd>wincmd l<cr>')
 nmap('<leader>wq', '<cmd>wincmd q<cr>')
-nmap('<leader>bd', '<cmd>bp<bar>sp<bar>bn<bar>bd!<cr>')
+nmap('<leader>q', '<cmd>bp<bar>sp<bar>bn<bar>bd!<cr>')
 nmap('<leader>a', '<cmd>lua vim.lsp.buf.code_action()<cr>')
 nmap('<leader>l', '$')
 nmap('<leader>h', '^')
 nmap('<leader>p', '"+p')
 nmap('<leader>y', '"+y')
 vmap('<leader>y', '"+y')
+nmap('ga', '<cmd>b#<cr>')
 nmap('gl', '$')
 nmap('gh', '^')
 nmap('<M-}>', 'gt')
@@ -319,4 +320,3 @@ imap('<M-k>', '<C-y>')
 nmap('<M-;>', '<cmd>Commentary<cr>')
 vmap('<M-;>', '<Plug>Commentary')
 nmap('\\', '<cmd>noh<cr>')
-
