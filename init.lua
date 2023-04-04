@@ -28,6 +28,8 @@ vim.call('plug#begin', path)
     -- Colors
     Plug('junegunn/seoul256.vim')
     Plug('phanviet/vim-monokai-pro')
+    Plug('savq/melange-nvim')
+    Plug('chriskempson/base16-vim')
 vim.call('plug#end')
 
 ----------------------------------------
@@ -50,9 +52,10 @@ vim.opt.relativenumber = true
 vim.g.mapleader = ' '
 vim.g.seoul256_background = 234
 vim.api.nvim_set_var('delimitMate_expand_cr', true)
-vim.cmd('colorscheme seoul256')
-vim.cmd('highlight clear Exception')
-vim.cmd('highlight Exception ctermfg=103 guifg=#999abd')
+vim.cmd('colorscheme melange')
+-- vim.cmd('colorscheme seoul256')
+-- vim.cmd('highlight clear Exception')
+-- vim.cmd('highlight Exception ctermfg=103 guifg=#999abd')
 
 ----------------------------------------
 -- Toggleterm
@@ -246,13 +249,17 @@ cmp.setup({
         { name = 'buffer' },
     }),
     cmp.setup.cmdline(':', {
-        sources = {
-            { name = 'cmdline' }
-        }
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = cmp.config.sources(
+            { { name = 'path' } },
+            { { name = 'cmdline' } }
+        )
     }),
     cmp.setup.cmdline('/', {
         mapping = cmp.mapping.preset.cmdline(),
-        sources = { { name = 'buffer' } }
+        sources = cmp.config.sources(
+            { { name = 'buffer' } }
+        )
     })
 })
 
